@@ -1,7 +1,7 @@
-slakcer
-=======
+aioslacker
+==========
 
-:info: slakcer wrapper for asyncio
+:info: slacker wrapper for asyncio
 
 .. image:: https://img.shields.io/travis/wikibusiness/aioslacker.svg
     :target: https://travis-ci.org/wikibusiness/aioslacker
