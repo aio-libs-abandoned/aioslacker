@@ -1,0 +1,23 @@
+# python specific
+env*
+*.pyc
+*.so
+*.pyd
+build/*
+dist/*
+MANIFEST
+__pycache__/
+*.egg-info/
+.coverage
+htmlcov
+
+# generic files to ignore
+*~
+*.lock
+*.DS_Store
+*.swp
+*.out
+
+.tox/
+deps/
+docs/_build/
