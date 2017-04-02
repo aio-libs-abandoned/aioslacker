@@ -7,7 +7,7 @@ import slacker
 
 from .compat import AIOHTTP_VERSION, PY_350, create_task
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 Error = slacker.Error
 
