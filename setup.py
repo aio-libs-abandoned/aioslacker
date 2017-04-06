@@ -29,7 +29,7 @@ setup(
     description='slacker wrapper for asyncio',
     long_description=read('README.rst'),
     install_requires=[
-        'aiohttp',
+        'aiohttp>=1.3.0',
         'slacker',
     ],
     packages=['aioslacker'],

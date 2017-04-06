@@ -5,7 +5,7 @@ import aiohttp
 import requests
 import slacker
 
-from .compat import AIOHTTP_VERSION, PY_350, create_task
+from .compat import PY_350, create_task
 
 __version__ = '0.0.2'
 
@@ -27,22 +27,12 @@ class BaseAPI(slacker.BaseAPI):
 
         self.loop = loop
 
-        if AIOHTTP_VERSION < (2, 0, 0):
-            self.session = aiohttp.ClientSession(
-                connector=aiohttp.TCPConnector(
-                    use_dns_cache=False,
-                    conn_timeout=None,
-                    loop=self.loop,
-                ),
-            )
-        else:
-            self.session = aiohttp.ClientSession(
-                conn_timeout=None,
-                connector=aiohttp.TCPConnector(
-                    use_dns_cache=False,
-                    loop=self.loop,
-                ),
-            )
+        self.session = aiohttp.ClientSession(
+            connector=aiohttp.TCPConnector(
+                use_dns_cache=False,
+                loop=self.loop,
+            ),
+        )
 
         self.methods = {
             requests.get: 'GET',
