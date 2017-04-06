@@ -48,6 +48,7 @@ class BaseAPI(slacker.BaseAPI):
         method = self.methods[method]
 
         kwargs.setdefault('params', {})
+        kwargs.setdefault('timeout', None)
 
         if self.token:
             kwargs['params']['token'] = self.token
@@ -272,7 +273,12 @@ class IncomingWebhook(BaseAPI, slacker.IncomingWebhook):
         if not self.url:
             raise slacker.Error('URL for incoming webhook is undefined')
 
-        _request = self.session.request('POST', self.url, data=data)
+        _request = self.session.request(
+            'POST',
+            self.url,
+            data=data,
+            timeout=None,
+        )
 
         _response = None
 
