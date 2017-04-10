@@ -105,12 +105,11 @@ class BaseAPI(slacker.BaseAPI):
 
         return fut
 
-    @asyncio.coroutine
     def close(self):
         if self.futs:
-            yield from asyncio.gather(*self.futs)
+            return asyncio.gather(*self.futs)
 
-        yield from self.session.close()
+        return self.session.close()
 
 
 class IM(BaseAPI, slacker.IM):
@@ -460,6 +459,5 @@ class Slacker(slacker.Slacker):
         def __aenter__(self):  # noqa
             return self
 
-        @asyncio.coroutine
         def __aexit__(self, *exc_info):  # noqa
-            yield from self.close()
+            return self.close()
