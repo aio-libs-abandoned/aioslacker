@@ -115,7 +115,7 @@ class BaseAPI(slacker.BaseAPI):
         if self.futs:
             coros += list(self.futs)
 
-        return asyncio.gather(*coros)
+        return asyncio.gather(*coros, loop=self.loop)
 
 
 class IM(BaseAPI, slacker.IM):
