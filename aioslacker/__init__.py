@@ -5,9 +5,9 @@ import aiohttp
 import requests
 import slacker
 
-from .compat import AIOHTTP_VERSION, PY_350, create_task
+from .compat import AIOHTTP_2, PY_350, create_future, create_task
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 Error = slacker.Error
 
@@ -27,22 +27,12 @@ class BaseAPI(slacker.BaseAPI):
 
         self.loop = loop
 
-        if AIOHTTP_VERSION < (2, 0, 0):
-            self.session = aiohttp.ClientSession(
-                connector=aiohttp.TCPConnector(
-                    use_dns_cache=False,
-                    conn_timeout=None,
-                    loop=self.loop,
-                ),
-            )
-        else:
-            self.session = aiohttp.ClientSession(
-                conn_timeout=None,
-                connector=aiohttp.TCPConnector(
-                    use_dns_cache=False,
-                    loop=self.loop,
-                ),
-            )
+        self.session = aiohttp.ClientSession(
+            connector=aiohttp.TCPConnector(
+                use_dns_cache=False,
+                loop=self.loop,
+            ),
+        )
 
         self.methods = {
             requests.get: 'GET',
@@ -58,6 +48,7 @@ class BaseAPI(slacker.BaseAPI):
         method = self.methods[method]
 
         kwargs.setdefault('params', {})
+        kwargs.setdefault('timeout', None)
 
         if self.token:
             kwargs['params']['token'] = self.token
@@ -114,12 +105,17 @@ class BaseAPI(slacker.BaseAPI):
 
         return fut
 
-    @asyncio.coroutine
     def close(self):
-        if self.futs:
-            yield from asyncio.gather(*self.futs)
+        coros = [self.session.close()]
+        if AIOHTTP_2:
+            future = create_future(loop=self.loop)
+            future.set_result(None)
+            coros = future
 
-        yield from self.session.close()
+        if self.futs:
+            coros += list(self.futs)
+
+        return asyncio.gather(*coros, loop=self.loop)
 
 
 class IM(BaseAPI, slacker.IM):
@@ -282,7 +278,12 @@ class IncomingWebhook(BaseAPI, slacker.IncomingWebhook):
         if not self.url:
             raise slacker.Error('URL for incoming webhook is undefined')
 
-        _request = self.session.request('POST', self.url, data=data)
+        _request = self.session.request(
+            'POST',
+            self.url,
+            data=data,
+            timeout=None,
+        )
 
         _response = None
 
@@ -464,6 +465,5 @@ class Slacker(slacker.Slacker):
         def __aenter__(self):  # noqa
             return self
 
-        @asyncio.coroutine
         def __aexit__(self, *exc_info):  # noqa
-            yield from self.close()
+            return self.close()

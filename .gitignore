@@ -9,6 +9,7 @@ MANIFEST
 __pycache__/
 *.egg-info/
 .coverage
+.python-version
 htmlcov
 
 # generic files to ignore
