@@ -107,10 +107,11 @@ class BaseAPI(slacker.BaseAPI):
 
     def close(self):
         coros = [self.session.close()]
+
         if AIOHTTP_2:
-            future = create_future(loop=self.loop)
-            future.set_result(None)
-            coros = future
+            fut = create_future(loop=self.loop)
+            fut.set_result(None)
+            coros = [fut]
 
         if self.futs:
             coros += list(self.futs)
