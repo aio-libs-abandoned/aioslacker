@@ -5,7 +5,7 @@ import aiohttp
 import requests
 import slacker
 
-from .compat import AIOHTTP_2, PY_350, create_future, create_task
+from .compat import AIOHTTP_2, PY_350, create_future, ensure_future
 
 __version__ = '0.0.3'
 
@@ -98,9 +98,11 @@ class BaseAPI(slacker.BaseAPI):
 
     def _request(self, method, api, **kwargs):
         coro = self.__request(method, api, **kwargs)
-        fut = create_task(loop=self.loop)(coro)
+
+        fut = ensure_future(coro, loop=self.loop)
 
         self.futs.add(fut)
+
         fut.add_done_callback(self.futs.remove)
 
         return fut
