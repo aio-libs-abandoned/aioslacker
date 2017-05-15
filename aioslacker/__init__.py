@@ -7,7 +7,7 @@ import slacker
 
 from .compat import AIOHTTP_2, PY_350, create_future, ensure_future
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
 Error = slacker.Error
 
