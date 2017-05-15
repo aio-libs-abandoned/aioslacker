@@ -107,18 +107,17 @@ class BaseAPI(slacker.BaseAPI):
 
         return fut
 
+    @asyncio.coroutine
     def close(self):
-        coros = [self.session.close()]
+        if self.futs:
+            yield from asyncio.gather(*self.futs, loop=self.loop)
+
+        coro = self.session.close()
 
         if AIOHTTP_2:
-            fut = create_future(loop=self.loop)
-            fut.set_result(None)
-            coros = [fut]
+            return
 
-        if self.futs:
-            coros += list(self.futs)
-
-        return asyncio.gather(*coros, loop=self.loop)
+        yield from coro
 
 
 class IM(BaseAPI, slacker.IM):
