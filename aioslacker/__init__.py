@@ -5,7 +5,7 @@ import aiohttp
 import requests
 import slacker
 
-from .compat import AIOHTTP_2, PY_350, ensure_future
+from .compat import PY_350, ensure_future
 
 __version__ = '0.0.7'
 
@@ -112,12 +112,7 @@ class BaseAPI(slacker.BaseAPI):
         if self.futs:
             yield from asyncio.gather(*self.futs, loop=self.loop)
 
-        coro = self.session.close()
-
-        if AIOHTTP_2:
-            return
-
-        yield from coro
+        yield from self.session.close()
 
 
 class IM(BaseAPI, slacker.IM):
