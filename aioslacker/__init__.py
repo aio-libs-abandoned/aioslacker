@@ -7,7 +7,7 @@ import slacker
 
 from .compat import PY_350, ensure_future
 
-__version__ = '0.0.7'
+__version__ = '0.0.8'
 
 Error = slacker.Error
 
