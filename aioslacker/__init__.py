@@ -462,5 +462,6 @@ class Slacker(slacker.Slacker):
         def __aenter__(self):  # noqa
             return self
 
+        @asyncio.coroutine
         def __aexit__(self, *exc_info):  # noqa
-            return self.close()
+            yield from self.close()
