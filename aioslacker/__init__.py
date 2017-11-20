@@ -428,6 +428,7 @@ class Slacker(slacker.Slacker):
             loop=self.loop,
         )
 
+    @asyncio.coroutine
     def close(self):
         coros = [
             self.im.close(),
@@ -455,7 +456,9 @@ class Slacker(slacker.Slacker):
             self.incomingwebhook.close(),
         ]
 
-        return asyncio.gather(*coros, loop=self.loop)
+        yield from asyncio.gather(*coros, loop=self.loop)
+
+        yield from asyncio.sleep(0.33, loop=self.loop)
 
     if PY_350:
         @asyncio.coroutine
