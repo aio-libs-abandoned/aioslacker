@@ -30,6 +30,7 @@ setup(
     long_description=read('README.rst'),
     install_requires=[
         'aiohttp>=1.3.0',
+        'async_timeout>=3.0.0',
         'slacker<=0.9.42',
     ],
     packages=['aioslacker'],
