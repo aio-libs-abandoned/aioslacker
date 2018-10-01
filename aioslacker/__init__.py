@@ -2,6 +2,7 @@ import asyncio
 from urllib.parse import urlencode
 
 import aiohttp
+import async_timeout
 import requests
 import slacker
 
@@ -79,7 +80,7 @@ class BaseAPI(slacker.BaseAPI):
         _response = None
 
         try:
-            with aiohttp.Timeout(self.timeout, loop=self.loop):
+            with async_timeout.timeout(self.timeout, loop=self.loop):
                 _response = yield from _request
 
             _response.raise_for_status()
@@ -285,7 +286,7 @@ class IncomingWebhook(BaseAPI, slacker.IncomingWebhook):
         _response = None
 
         try:
-            with aiohttp.Timeout(self.timeout, loop=self.loop):
+            with async_timeout.timeout(self.timeout, loop=self.loop):
                 _response = yield from _request
 
             _response.raise_for_status()
