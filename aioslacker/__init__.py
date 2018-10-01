@@ -8,7 +8,7 @@ import slacker
 
 from .compat import PY_350, ensure_future
 
-__version__ = '0.0.10'
+__version__ = '0.0.11'
 
 Error = slacker.Error
 
@@ -21,7 +21,8 @@ class BaseAPI(slacker.BaseAPI):
         self,
         token=None,
         timeout=slacker.DEFAULT_TIMEOUT,
-        *, loop=None
+        *,
+        loop=None
     ):
         if loop is None:
             loop = asyncio.get_event_loop()
@@ -111,7 +112,11 @@ class BaseAPI(slacker.BaseAPI):
     @asyncio.coroutine
     def close(self):
         if self.futs:
-            yield from asyncio.gather(*self.futs, loop=self.loop)
+            yield from asyncio.gather(
+                *self.futs,
+                loop=self.loop,
+                return_exceptions=True
+            )
 
         yield from self.session.close()
 
@@ -158,7 +163,11 @@ class Team(BaseAPI, slacker.Team):
             super().close(),
             self._profile.close(),
         ]
-        return asyncio.gather(*coros, loop=self.loop)
+        return asyncio.gather(
+            *coros,
+            loop=self.loop,
+            return_exceptions=True
+        )
 
 
 class Pins(BaseAPI, slacker.Pins):
@@ -184,7 +193,11 @@ class Users(BaseAPI, slacker.Users):
             super().close(),
             self._profile.close(),
         ]
-        return asyncio.gather(*coros, loop=self.loop)
+        return asyncio.gather(
+            *coros,
+            loop=self.loop,
+            return_exceptions=True
+        )
 
 
 class FilesComments(BaseAPI, slacker.FilesComments):
@@ -202,7 +215,11 @@ class Files(BaseAPI, slacker.Files):
             super().close(),
             self._comments.close(),
         ]
-        return asyncio.gather(*coros, loop=self.loop)
+        return asyncio.gather(
+            *coros,
+            loop=self.loop,
+            return_exceptions=True
+        )
 
 
 class Stars(BaseAPI, slacker.Stars):
@@ -256,7 +273,11 @@ class UserGroups(BaseAPI, slacker.UserGroups):
             super().close(),
             self._users.close(),
         ]
-        return asyncio.gather(*coros, loop=self.loop)
+        return asyncio.gather(
+            *coros,
+            loop=self.loop,
+            return_exceptions=True
+        )
 
 
 class IncomingWebhook(BaseAPI, slacker.IncomingWebhook):
@@ -456,7 +477,11 @@ class Slacker(slacker.Slacker):
             self.incomingwebhook.close(),
         ]
 
-        return asyncio.gather(*coros, loop=self.loop)
+        return asyncio.gather(
+            *coros,
+            loop=self.loop,
+            return_exceptions=True
+        )
 
     if PY_350:
         @asyncio.coroutine

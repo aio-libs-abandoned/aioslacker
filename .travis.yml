@@ -5,8 +5,13 @@ python:
   - "3.5"
   - "3.6"
 env:
-  - AIOHTTP="2"
-  - AIOHTTP="1"
+  - AIOHTTP=3
+  - AIOHTTP=2
+  - AIOHTTP=1
+matrix:
+  exclude:
+    - python: 3.4
+      env: AIOHTTP=3
 install:
   - pip install -U setuptools
   - pip install -U pip
@@ -17,8 +22,17 @@ script:
   - echo "$TOXENV"
 
   - tox
-cache:
-  directories:
-    - $HOME/.cache/pip
+cache: pip
 notifications:
   email: false
+
+deploy:
+  provider: pypi
+  user: hellysmile
+  password:
+    secure: "fMgYEBlK3npz5AMbXfTSFEZEHoGB+kpLXnO6G4Zvy47weDH14QYOxFI29Ria57Y6y+t8TSnuumytQx3vSBYy9LFYtgYOLECcTEWzdBTi2jvxEvGP/ZmA56cx1Nn6B53ZDPsk1XO9X5z34ezZiJhbrjU82AKcMmR1a4yqrZdLNE4zMDDYo46wvO6rI/xVhhufNCVfkODtr5Z4etXRV7/JfIwrwhRgbSZWm92q33cACkwPnyNZrJYhqWU67WtCeogBTj1m9zQ2gfLGGLpvxFmzOVfbOboReedi7+x4ipfo3jL3KgfjnJN1B/gz93vItr7J5WG8TaF0KR36/oZbgeVPNMjK53YkMN3bnbgLQ9OvLbmpNIgquap6wCcndzaoEDC4T6xvVpgbWfTAK7g0GA63+IrnqKIGI83X27bzl0PDcnjV+P0ivvIeb5X2UqKyZJd4DfLSEHQHXvSLnSNxcjubNEUfzP6TNfPBXtky9PdH+NhBqiiQTyP+INEe0B7/c3xbSjROs0wVfRkWbk1dnbqGdm3/xHo1omWpCgdMAlFOFlrLnO6O6hCZUJJgnbVYTr9GC0RpNKNEmsbxPVcefoSRIGvHP9qz2V2IRAnie/4aXAD0e0xgKjpvRciABZc2VpmPrJ9zN85O0QKzepLF/clNB5TxpTi2JdgfP/REFCUZmEA="
+  distributions: "sdist"
+  on:
+    tags: true
+    all_branches: true
+    python: 3.6

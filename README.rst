@@ -3,8 +3,8 @@ aioslacker
 
 :info: slacker wrapper for asyncio
 
-.. image:: https://img.shields.io/travis/wikibusiness/aioslacker.svg
-    :target: https://travis-ci.org/wikibusiness/aioslacker
+.. image:: https://travis-ci.org/aio-libs/aioslacker.svg?branch=master
+    :target: https://travis-ci.org/aio-libs/aioslacker
 
 .. image:: https://img.shields.io/pypi/v/aioslacker.svg
     :target: https://pypi.python.org/pypi/aioslacker
@@ -35,3 +35,9 @@ Usage
     loop.run_until_complete(go())
     loop.close()
 
+Thanks
+------
+
+The library was donated by `Ocean S.A. <https://ocean.io/>`_
+
+Thanks to the company for contribution.

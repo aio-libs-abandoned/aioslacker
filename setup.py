@@ -23,9 +23,9 @@ def read(*parts):
 setup(
     name='aioslacker',
     version=get_version(),
-    author='wikibusiness',
-    author_email='osf@wikibusiness.org',
-    url='https://github.com/wikibusiness/aioslacker',
+    author='Victor Kovtun',
+    author_email='hellysmile@gmail.com',
+    url='https://github.com/aio-libs/aioslacker',
     description='slacker wrapper for asyncio',
     long_description=read('README.rst'),
     install_requires=[
