@@ -295,7 +295,9 @@ class IncomingWebhook(BaseAPI, slacker.IncomingWebhook):
     ):
         self.url = url
 
-        super().__init__(token=None, timeout=timeout, session=session, loop=loop)
+        super().__init__(
+            token=None, timeout=timeout, session=session, loop=loop
+        )
 
     @asyncio.coroutine
     def post(self, data):
