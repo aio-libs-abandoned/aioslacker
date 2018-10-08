@@ -30,13 +30,11 @@ class BaseAPI(slacker.BaseAPI):
 
         self.loop = loop
 
-        if not isinstance(session, aiohttp.ClientSession):
-            session = aiohttp.ClientSession(
-                connector=aiohttp.TCPConnector(
-                    use_dns_cache=False,
-                    loop=self.loop,
-                ),
-            )
+        self._close_session = False
+
+        if session is None:
+            session = aiohttp.ClientSession(loop=self.loop)
+            self._close_session = True
 
         self.session = session
 
@@ -122,7 +120,8 @@ class BaseAPI(slacker.BaseAPI):
                 return_exceptions=True
             )
 
-        yield from self.session.close()
+        if self._close_session:
+            yield from self.session.close()
 
 
 class IM(BaseAPI, slacker.IM):
@@ -158,6 +157,7 @@ class TeamProfile(BaseAPI, slacker.TeamProfile):
 
 
 class Team(BaseAPI, slacker.Team):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._profile = TeamProfile(*args, **kwargs)
@@ -296,7 +296,10 @@ class IncomingWebhook(BaseAPI, slacker.IncomingWebhook):
         self.url = url
 
         super().__init__(
-            token=None, timeout=timeout, session=session, loop=loop
+            token=None,
+            timeout=timeout,
+            session=session,
+            loop=loop,
         )
 
     @asyncio.coroutine
