@@ -36,7 +36,7 @@ class BaseAPI(slacker.BaseAPI):
             session = aiohttp.ClientSession(loop=self.loop)
             self._close_session = True
 
-        self.session = session
+        self._session = session
 
         self.methods = {
             requests.get: 'GET',
@@ -59,6 +59,12 @@ class BaseAPI(slacker.BaseAPI):
 
         kwargs['params'] = urlencode(kwargs['params'], doseq=True)
 
+        kwargs['data'] = {
+            key: value
+            for key, value in kwargs.get('data', {}).items()
+            if value is not None
+        }
+
         if method == 'POST':
             files = kwargs.pop('files', None)
 
@@ -78,7 +84,7 @@ class BaseAPI(slacker.BaseAPI):
 
         _url = slacker.API_BASE_URL.format(api=api)
 
-        _request = self.session.request(method, _url, **kwargs)
+        _request = self._session.request(method, _url, **kwargs)
 
         _response = None
 
@@ -121,7 +127,7 @@ class BaseAPI(slacker.BaseAPI):
             )
 
         if self._close_session:
-            yield from self.session.close()
+            yield from self._session.close()
 
 
 class IM(BaseAPI, slacker.IM):
@@ -307,7 +313,7 @@ class IncomingWebhook(BaseAPI, slacker.IncomingWebhook):
         if not self.url:
             raise slacker.Error('URL for incoming webhook is undefined')
 
-        _request = self.session.request(
+        _request = self._session.request(
             'POST',
             self.url,
             data=data,
