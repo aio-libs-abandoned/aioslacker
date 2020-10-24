@@ -11,6 +11,7 @@ aioslacker
     
     
 **!!!The library is not maintained!!!**
+
 **Please use the official client: https://github.com/slackapi/python-slackclient**
 
 Installation
