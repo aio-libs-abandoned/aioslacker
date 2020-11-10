@@ -21,6 +21,7 @@ class BaseAPI(slacker.BaseAPI):
         self,
         token=None,
         timeout=slacker.DEFAULT_TIMEOUT,
+        session=None,
         *,
         loop=None
     ):
@@ -29,12 +30,13 @@ class BaseAPI(slacker.BaseAPI):
 
         self.loop = loop
 
-        self.session = aiohttp.ClientSession(
-            connector=aiohttp.TCPConnector(
-                use_dns_cache=False,
-                loop=self.loop,
-            ),
-        )
+        self._close_session = False
+
+        if session is None:
+            session = aiohttp.ClientSession(loop=self.loop)
+            self._close_session = True
+
+        self._session = session
 
         self.methods = {
             requests.get: 'GET',
@@ -57,6 +59,12 @@ class BaseAPI(slacker.BaseAPI):
 
         kwargs['params'] = urlencode(kwargs['params'], doseq=True)
 
+        kwargs['data'] = {
+            key: value
+            for key, value in kwargs.get('data', {}).items()
+            if value is not None
+        }
+
         if method == 'POST':
             files = kwargs.pop('files', None)
 
@@ -76,7 +84,7 @@ class BaseAPI(slacker.BaseAPI):
 
         _url = slacker.API_BASE_URL.format(api=api)
 
-        _request = self.session.request(method, _url, **kwargs)
+        _request = self._session.request(method, _url, **kwargs)
 
         _response = None
 
@@ -118,7 +126,8 @@ class BaseAPI(slacker.BaseAPI):
                 return_exceptions=True
             )
 
-        yield from self.session.close()
+        if self._close_session:
+            yield from self._session.close()
 
 
 class IM(BaseAPI, slacker.IM):
@@ -154,6 +163,7 @@ class TeamProfile(BaseAPI, slacker.TeamProfile):
 
 
 class Team(BaseAPI, slacker.Team):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._profile = TeamProfile(*args, **kwargs)
@@ -286,18 +296,24 @@ class IncomingWebhook(BaseAPI, slacker.IncomingWebhook):
         self,
         url=None,
         timeout=slacker.DEFAULT_TIMEOUT,
+        session=None,
         *, loop=None
     ):
         self.url = url
 
-        super().__init__(token=None, timeout=timeout, loop=loop)
+        super().__init__(
+            token=None,
+            timeout=timeout,
+            session=session,
+            loop=loop,
+        )
 
     @asyncio.coroutine
     def post(self, data):
         if not self.url:
             raise slacker.Error('URL for incoming webhook is undefined')
 
-        _request = self.session.request(
+        _request = self._session.request(
             'POST',
             self.url,
             data=data,
@@ -327,6 +343,7 @@ class Slacker(slacker.Slacker):
         token,
         incoming_webhook_url=None,
         timeout=slacker.DEFAULT_TIMEOUT,
+        session=None,
         *, loop=None
     ):
         if loop is None:
@@ -337,116 +354,139 @@ class Slacker(slacker.Slacker):
         self.im = IM(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.api = API(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.dnd = DND(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.rtm = RTM(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.auth = Auth(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.bots = Bots(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.chat = Chat(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.team = Team(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.pins = Pins(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.mpim = MPIM(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.users = Users(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.files = Files(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.stars = Stars(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.emoji = Emoji(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.search = Search(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.groups = Groups(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.channels = Channels(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.presence = Presence(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.reminders = Reminders(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.reactions = Reactions(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.idpgroups = IDPGroups(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.usergroups = UserGroups(
             token=token,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
         self.incomingwebhook = IncomingWebhook(
             url=incoming_webhook_url,
             timeout=timeout,
+            session=session,
             loop=self.loop,
         )
 

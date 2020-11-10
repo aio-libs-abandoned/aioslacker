@@ -31,7 +31,7 @@ setup(
     install_requires=[
         'aiohttp>=1.3.0',
         'async_timeout>=2.0.0',
-        'slacker<=0.9.42',
+        'slacker',
     ],
     packages=['aioslacker'],
     include_package_data=True,
