@@ -3,7 +3,6 @@ from urllib.parse import urlencode
 
 import aiohttp
 import async_timeout
-import requests
 import slacker
 
 from .compat import PY_350, ensure_future
@@ -24,6 +23,7 @@ class BaseAPI(slacker.BaseAPI):
         *,
         loop=None
     ):
+        super().__init__(token=token, timeout=timeout)
         if loop is None:
             loop = asyncio.get_event_loop()
 
@@ -34,21 +34,13 @@ class BaseAPI(slacker.BaseAPI):
                 use_dns_cache=False,
                 loop=self.loop,
             ),
+            raise_for_status=True,
         )
-
-        self.methods = {
-            requests.get: 'GET',
-            requests.post: 'POST',
-        }
 
         self.futs = set()
 
-        super().__init__(token=token, timeout=timeout)
-
     @asyncio.coroutine
     def __request(self, method, api, **kwargs):
-        method = self.methods[method]
-
         kwargs.setdefault('params', {})
         kwargs.setdefault('timeout', None)
 
@@ -84,8 +76,6 @@ class BaseAPI(slacker.BaseAPI):
             with async_timeout.timeout(self.timeout, loop=self.loop):
                 _response = yield from _request
 
-            _response.raise_for_status()
-
             text = yield from _response.text()
         finally:
             if _response is not None:
@@ -100,14 +90,22 @@ class BaseAPI(slacker.BaseAPI):
 
     def _request(self, method, api, **kwargs):
         coro = self.__request(method, api, **kwargs)
-
         fut = ensure_future(coro, loop=self.loop)
-
         self.futs.add(fut)
-
         fut.add_done_callback(self.futs.remove)
-
         return fut
+
+    def _session_get(self, api, **kwargs):
+        return self._request('GET', api, **kwargs)
+
+    def get(self, api, **kwargs):
+        return self._session_get(api, **kwargs)
+
+    def _session_post(self, api, **kwargs):
+        return self._request('POST', api, **kwargs)
+
+    def post(self, api, **kwargs):
+        return self._session_post(api, **kwargs)
 
     @asyncio.coroutine
     def close(self):
@@ -309,8 +307,6 @@ class IncomingWebhook(BaseAPI, slacker.IncomingWebhook):
         try:
             with async_timeout.timeout(self.timeout, loop=self.loop):
                 _response = yield from _request
-
-            _response.raise_for_status()
 
             _json = yield from _response.json()
         finally:
